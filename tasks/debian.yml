@@ -16,6 +16,7 @@
         "libnss-winbind",
         "libpam-winbind",
         "winbind",
+        "smbclient"
       ]
     state: present
   become: true

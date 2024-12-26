@@ -1,8 +1,16 @@
 ---
 # defaults file for ansible-samba
-pri_domain_name: example.org
+pri_domain_name: argryl.linux
 samba_ad_info:
-  []
+  ad_dc_hostname: "{{ ansible_hostname }}"
+  ad_dns_domain_name: "{{ pri_domain_name }}"
+  adminpass: P@55w0rd
+  allow_dns_updates: disabled
+  backend_dns: internal
+  dns_forwarder: 8.8.8.8
+  kerberos_realm: '{{ pri_domain_name }}'
+  netbios_domain_name: "{{ samba_netbios_domain_name[0]|upper }}"
+
   # ad_dc_hostname: "{{ ansible_hostname }}"
   # ad_dns_domain_name: "{{ pri_domain_name }}"
   # adminpass: P@55w0rd
@@ -17,26 +25,46 @@ samba_ad_info:
 samba_allow_guests: "yes"
 
 # Defines if you are building an Active Directory domain controller
-samba_create_domain_controller: false
+#samba_create_domain_controller: false
+samba_create_domain_controller: true
+
 
 # Defines if groups defined in samba_domain_groups list should be created
-samba_create_domain_groups: false
+#samba_create_domain_groups: false
+samba_create_domain_groups: true
 
 # Defines if users defined in samba_domain_users list should be created
-samba_create_domain_users: false
+#samba_create_domain_users: false
+samba_create_domain_users: true
 
 # Define Ansible group which contains your Samba domain controllers
 samba_domain_controllers_group: samba_domain_controllers
 
 samba_domain_groups:
-  []
+  - name: itguy
+    members:
+      - alice
+      - bob
+  - name: accountant
+    members:
+      - toto
+      - kevin
   # - name: ad-test-group1
   #   members:
   #     - test01
   #     - test02
 
 samba_domain_users:
-  []
+  - name: toto
+    password: P@55w0rd
+  - name: alice
+    password: P@55w0rd
+  - name: bob
+    password: P@55w0rd
+  - name: kevin
+    password: P@55w0rd
+  - name: administrator
+    password: P@55w0rd
   # - name: test01
   #   password: P@55w0rd
   # - name: test02
@@ -44,7 +72,9 @@ samba_domain_users:
 
 # Define samba groups to create
 samba_groups:
-  []
+  - itguy
+  - accountant
+
   # - nogroup
   # - securedgroup
   # - testgroup
@@ -59,12 +89,21 @@ samba_security: user
 
 # Defines server role
 # (standalone server or active directory domain controller)
-samba_server_role: standalone server
+#samba_server_role: standalone server
+samba_server_role: active directory domain controller
 
 # Defines root folder for samba shares to be created
 samba_share_path: /mnt/samba/shares
 samba_shares:
-  []
+  - name: sambaad
+    path: /mnt/shares/sambaad
+    browsable: "yes"
+    folder_perms: "0755"
+    group: itguy
+    guest_ok: "no"
+    owner: bob
+    read_only: "no"
+    writable: "yes"
   # - name: allaccess
   #   browsable: "yes"
   #   folder_perms: "0755"
@@ -98,8 +137,27 @@ samba_shares:
 
 # Define users to create
 samba_users:
-  []
-  #   # Define user name to create
+  - name: toto
+    groups:
+      - accountant
+    smbpasswd: P@55w0rd
+  - name: alice
+    groups:
+      - itguy
+    smbpasswd: P@55w0rd
+  - name: bob
+    groups:
+      - itguy
+    smbpasswd: P@55w0rd
+  - name: kevin
+    groups:
+      - accountant
+    smbpasswd: P@55w0rd
+  - name: administrator
+    groups:
+      - itguy
+      - accountant
+    smbpasswd: P@55w0rd #   # Define user name to create
   # - name: vagrant
   #   # Define groups to add user to
   #   # ensure samba_groups names exist.
